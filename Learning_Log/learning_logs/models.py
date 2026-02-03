@@ -28,4 +28,3 @@ class Entry(models.Model):
             return "无内容"
         text_str = str(self.text)
         return text_str[:50] + "..." if len(text_str) > 50 else text_str
-    
