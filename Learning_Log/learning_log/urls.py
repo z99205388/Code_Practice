@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
+
+def index(request):
+    return redirect('learning_logs:index')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('learning_logs.urls', namespace='learning_logs'))
+    path('', index, name='index'),  # 根URL重定向到学习日志主页
+    path('learning_logs/', include('learning_logs.urls', namespace='learning_logs')),
+    path('users/', include('users.urls', namespace='users')),
 ]
