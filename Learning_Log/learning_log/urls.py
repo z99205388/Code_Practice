@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
+from django.conf import settings
+from django.conf.urls.static import static
 
 def index(request):
     return redirect('learning_logs:index')
@@ -26,4 +28,9 @@ urlpatterns = [
     path('', index, name='index'),  # 根URL重定向到学习日志主页
     path('learning_logs/', include('learning_logs.urls', namespace='learning_logs')),
     path('users/', include('users.urls', namespace='users')),
+    path('data_visualization/', include('data_visualization.urls', namespace='data_visualization')),
 ]
+
+# 在开发环境中提供媒体文件服务
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,37 @@
+{% extends "data_visualization/base.html" %}
+
+{% block header %}
+<h1>All Data Visualization Charts</h1>
+{% endblock header %}
+
+{% block content %}
+<p>Below is a comprehensive list of all data visualization charts in the system.</p>
+
+<div class="row">
+{% for chart in charts %}
+<div class="col-md-6">
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4>{{ chart.title }}</h4>
+</div>
+<div class="panel-body">
+<div class="thumbnail">
+<img src="{{ chart.image_path }}" alt="{{ chart.title }}" class="img-responsive">
+</div>
+<p><strong>Category:</strong> {{ chart.category }}</p>
+<p><strong>Date Added:</strong> {{ chart.date_added|date:"M d, Y H:i" }}</p>
+<p>{{ chart.description|truncatewords:30 }}</p>
+<a href="{% url 'data_visualization:chart_detail' chart.id %}" class="btn btn-primary">View Details</a>
+</div>
+</div>
+</div>
+{% empty %}
+<div class="col-md-12">
+<div class="alert alert-warning">
+<h4>No Charts Available</h4>
+<p>There are no charts to display. Please add some data visualization charts first.</p>
+</div>
+</div>
+{% endfor %}
+</div>
+{% endblock content %}

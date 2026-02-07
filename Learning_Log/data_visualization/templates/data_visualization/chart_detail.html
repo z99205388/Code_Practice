@@ -1,0 +1,52 @@
+{% extends "data_visualization/base.html" %}
+
+{% block header %}
+<h1>{{ chart.title }}</h1>
+{% endblock header %}
+
+{% block content %}
+<div class="row">
+<div class="col-md-8">
+<div class="thumbnail">
+<img src="{{ chart.image_path }}" alt="{{ chart.title }}" class="img-responsive">
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="panel panel-default">
+<div class="panel-heading">
+<h3>Chart Details</h3>
+</div>
+<div class="panel-body">
+<dl class="dl-horizontal">
+<dt>Category:</dt>
+<dd>{{ chart.category }}</dd>
+
+<dt>Date Added:</dt>
+<dd>{{ chart.date_added|date:"F d, Y" }}</dd>
+
+<dt>Data File:</dt>
+<dd>{{ chart.data_file|default:"Not specified" }}</dd>
+
+<dt>Script File:</dt>
+<dd>{{ chart.script_file }}</dd>
+</dl>
+</div>
+</div>
+
+<div class="panel panel-info">
+<div class="panel-heading">
+<h3>Description</h3>
+</div>
+<div class="panel-body">
+<p>{{ chart.description }}</p>
+</div>
+</div>
+
+<div class="btn-group-vertical" style="width: 100%;">
+<a href="{% url 'data_visualization:index' %}" class="btn btn-default btn-block">Back to Gallery</a>
+<a href="{% url 'data_visualization:charts' %}" class="btn btn-default btn-block">All Charts</a>
+</div>
+</div>
+</div>
+{% endblock content %}
