@@ -1,0 +1,98 @@
+{% extends "data_visualization/base.html" %}
+
+{% block header %}
+<h1>Processing Result</h1>
+{% endblock header %}
+
+{% block content %}
+
+{% if success %}
+<div class="alert alert-success">
+<h4><span class="glyphicon glyphicon-ok-circle"></span> Success!</h4>
+<p>{{ message }}</p>
+</div>
+
+<div class="panel panel-success">
+<div class="panel-heading">
+<h3 class="panel-title">Generated Chart</h3>
+</div>
+<div class="panel-body">
+<div class="row">
+<div class="col-md-8">
+<div class="thumbnail">
+<img src="{{ chart.image_path }}" alt="{{ chart.title }}" class="img-responsive">
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4>Chart Details</h4>
+</div>
+<div class="panel-body">
+<dl class="dl-horizontal">
+<dt>Title:</dt>
+<dd>{{ chart.title }}</dd>
+
+<dt>Category:</dt>
+<dd>{{ chart.category }}</dd>
+
+<dt>Date Added:</dt>
+<dd>{{ chart.date_added|date:"F d, Y H:i" }}</dd>
+
+<dt>Data File:</dt>
+<dd>{{ chart.data_file }}</dd>
+
+<dt>Script File:</dt>
+<dd>{{ chart.script_file }}</dd>
+</dl>
+</div>
+</div>
+
+<div class="panel panel-info">
+<div class="panel-heading">
+<h4>Description</h4>
+</div>
+<div class="panel-body">
+<p>{{ chart.description }}</p>
+</div>
+</div>
+
+<div class="btn-group-vertical" style="width: 100%;">
+<a href="{% url 'data_visualization:chart_detail' chart.id %}" class="btn btn-primary btn-block">View Full Details</a>
+<a href="{% url 'data_visualization:charts' %}" class="btn btn-default btn-block">All Charts</a>
+<a href="{% url 'data_visualization:process_data' %}" class="btn btn-success btn-block">Process Another File</a>
+<a href="{% url 'data_visualization:index' %}" class="btn btn-default btn-block">Back to Gallery</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+{% else %}
+<div class="alert alert-danger">
+<h4><span class="glyphicon glyphicon-exclamation-sign"></span> Error!</h4>
+<p>{{ message }}</p>
+</div>
+
+<div class="panel panel-warning">
+<div class="panel-heading">
+<h3 class="panel-title">File Information</h3>
+</div>
+<div class="panel-body">
+<p><strong>File Path:</strong> {{ file_path }}</p>
+</div>
+</div>
+
+<div class="text-center">
+<a href="{% url 'data_visualization:process_data' %}" class="btn btn-warning btn-lg">
+<span class="glyphicon glyphicon-refresh"></span> Try Again
+</a>
+<a href="{% url 'data_visualization:index' %}" class="btn btn-default btn-lg">
+<span class="glyphicon glyphicon-arrow-left"></span> Back to Gallery
+</a>
+</div>
+
+{% endif %}
+
+{% endblock content %}

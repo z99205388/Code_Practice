@@ -1,0 +1,8 @@
+{% extends "learning_logs/base.html" %}
+
+{% block content %}
+<p>You have been logged out. Thank you for visiting!</p>
+<div class="text-center mt-3">
+    <a href="{% url 'learning_logs:index' %}" class="btn btn-primary">Return to Home Page</a>
+</div>
+{% endblock content %}
