@@ -4,9 +4,16 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import os
+import csv
+import json
+from datetime import datetime
+
+import matplotlib
+
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 from .models import Chart
-
 # Create your views here.
 
 def index(request):
@@ -34,6 +41,7 @@ def chart_detail(request, chart_id):
 def process_data(request):
     """处理数据选择页面"""
     if request.method == 'POST':
+        print("request:",request.POST)
         action = request.POST.get('action')
         chart_title = request.POST.get('chart_title', '')
         description = request.POST.get('description', '')
@@ -68,12 +76,6 @@ def process_data(request):
 def handle_data_processing(request, file_path, chart_title, description, chart_type, source_type):
     """处理数据并生成图表"""
     try:
-        import csv
-        import matplotlib
-        matplotlib.use('Agg')
-        import matplotlib.pyplot as plt
-        from datetime import datetime
-
         # 确保图表目录存在
         charts_dir = os.path.join(settings.MEDIA_ROOT, 'charts')
         if not os.path.exists(charts_dir):
@@ -120,7 +122,6 @@ def handle_data_processing(request, file_path, chart_title, description, chart_t
 
 def generate_chart_from_csv(file_path, chart_path, chart_type, chart_title):
     """从 CSV 文件生成图表"""
-    import csv
 
     with open(file_path, 'r') as f:
         reader = csv.reader(f)
@@ -171,7 +172,6 @@ def generate_chart_from_csv(file_path, chart_path, chart_type, chart_title):
 
 def generate_chart_from_json(file_path, chart_path, chart_type, chart_title):
     """从 JSON 文件生成图表"""
-    import json
 
     with open(file_path, 'r') as f:
         data = json.load(f)
