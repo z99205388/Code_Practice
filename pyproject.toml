@@ -1,0 +1,29 @@
+[project]
+name = "code-practice"
+version = "0.1.0"
+description = "Learning Log Django Project"
+requires-python = ">=3.11"
+dependencies = [
+    "django>=5.0",
+    "bootstrap3",
+    "matplotlib",
+    "pillow",
+    "random-walk>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-django",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "learning_log.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+
+[tool.django]
+version = "5.2"
