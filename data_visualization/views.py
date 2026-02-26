@@ -75,21 +75,19 @@ def process_data(request):
 
 def handle_data_processing(request, file_path, chart_title, description, chart_type, source_type):
     """处理数据并生成图表"""
+    # 确保图表目录存在
+    charts_dir = os.path.join(settings.MEDIA_ROOT, 'charts')
+    if not os.path.exists(charts_dir):
+        os.makedirs(charts_dir)
+    
+    # 生成唯一的文件名
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    chart_filename = f'chart_{timestamp}.png'
+    chart_path = os.path.join(charts_dir, chart_filename)
+    
     try:
-        # 确保图表目录存在
-        charts_dir = os.path.join(settings.MEDIA_ROOT, 'charts')
-        if not os.path.exists(charts_dir):
-            os.makedirs(charts_dir)
-
-        # 生成唯一的文件名
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        chart_filename = f'chart_{timestamp}.png'
-        chart_path = os.path.join(charts_dir, chart_filename)
-
         # 读取数据并生成图表
-        if file_path.endswith('.csv'):
-            generate_chart_from_csv(file_path, chart_path, chart_type, chart_title)
-        elif file_path.endswith('.json'):
+        if file_path.endswith('.json'):
             generate_chart_from_json(file_path, chart_path, chart_type, chart_title)
         else:
             # 默认为 CSV 处理
@@ -105,13 +103,6 @@ def handle_data_processing(request, file_path, chart_title, description, chart_t
             script_file=f'data_visualization/views.py (handle_data_processing)'
         )
 
-        # 重定向到结果页面
-        return render(request, 'data_visualization/process_result.html', {
-            'chart': chart,
-            'success': True,
-            'message': f'Chart "{chart_title}" has been successfully generated!'
-        })
-
     except Exception as e:
         # 处理错误
         return render(request, 'data_visualization/process_result.html', {
@@ -119,6 +110,13 @@ def handle_data_processing(request, file_path, chart_title, description, chart_t
             'message': f'Error processing data: {str(e)}',
             'file_path': file_path
         })
+
+    # 重定向到结果页面
+    return render(request, 'data_visualization/process_result.html', {
+        'chart': chart,
+        'success': True,
+        'message': f'Chart "{chart_title}" has been successfully generated!'
+    })
 
 def generate_chart_from_csv(file_path, chart_path, chart_type, chart_title):
     """从 CSV 文件生成图表"""
