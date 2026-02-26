@@ -86,12 +86,15 @@ def handle_data_processing(request, file_path, chart_title, description, chart_t
     chart_path = os.path.join(charts_dir, chart_filename)
     
     try:
-        # 读取数据并生成图表
-        if file_path.endswith('.json'):
-            generate_chart_from_json(file_path, chart_path, chart_type, chart_title)
-        else:
-            # 默认为 CSV 处理
-            generate_chart_from_csv(file_path, chart_path, chart_type, chart_title)
+        # # 读取数据并生成图表
+        # if file_path.endswith('.json'):
+        #     generate_chart_from_json(file_path, chart_path, chart_type, chart_title)
+        # else:
+        #     # 默认为 CSV 处理
+        #     generate_chart_from_csv(file_path, chart_path, chart_type, chart_title)
+
+        parse_file_result = parse_file(file_path)
+        generate_chart(parse_file_result, chart_path, chart_type, chart_title)
 
         # 创建数据库记录
         chart = Chart.objects.create(
@@ -118,89 +121,65 @@ def handle_data_processing(request, file_path, chart_title, description, chart_t
         'message': f'Chart "{chart_title}" has been successfully generated!'
     })
 
-def generate_chart_from_csv(file_path, chart_path, chart_type, chart_title):
-    """从 CSV 文件生成图表"""
+def parse_file(file_path):
+    """文件解析"""
+    result = {
+        'data': [],
+        'header':None
+    }
 
-    with open(file_path, 'r') as f:
-        reader = csv.reader(f)
-        header = next(reader)  # 读取表头
+    if file_path.endswith('.json'):
+        with open(file_path, 'r')  as f:
+            result['data'] = json.load(f)
+    elif file_path.endswith('.csv'):
+        with open(file_path, 'r') as f:
+            reader = csv.reader(f)
+            result['header'] = next(reader)  
+            result['data'] = [row for row in reader]
+    else:
+        ext = os.path.splitext(file_path)[1]
+        print(f"暂不支持 {ext} 文件类型解析")
 
-        # 读取数据列
-        data = []
-        for row in reader:
-            data.append(row)
+    return result
 
-        # 根据图表类型生成不同的图表
-        fig = plt.figure(dpi=128, figsize=(10, 6))
-
-        if chart_type == 'line' or chart_type == 'bar':
-            # 假设第一列是标签，第二列是数值
-            x_labels = [row[0] for row in data[:10]]  # 只显示前10个
-            y_values = [float(row[1]) for row in data[:10]] if len(data[0]) > 1 else list(range(len(data[:10])))
-
-            if chart_type == 'line':
-                plt.plot(x_labels, y_values, marker='o')
-            else:
-                plt.bar(x_labels, y_values)
-
-        elif chart_type == 'scatter':
-            x_values = [float(row[1]) for row in data[:50]] if len(data[0]) > 1 else list(range(len(data[:50])))
-            y_values = [float(row[2]) for row in data[:50]] if len(data[0]) > 2 else list(range(len(data[:50])))
-            plt.scatter(x_values, y_values)
-
-        elif chart_type == 'histogram':
-            values = [float(row[1]) for row in data if len(row) > 1]
-            plt.hist(values, bins=20)
-
-        elif chart_type == 'pie':
-            labels = [row[0] for row in data[:10]]
-            values = [float(row[1]) for row in data[:10]] if len(data[0]) > 1 else [1] * len(labels)
-            plt.pie(values, labels=labels, autopct='%1.1f%%')
-
-        plt.title(chart_title, fontsize=16)
-        plt.xlabel(header[0] if len(header) > 0 else 'X')
-        if len(header) > 1:
-            plt.ylabel(header[1])
-
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-
-        plt.savefig(chart_path, bbox_inches='tight')
-        plt.close()
-
-def generate_chart_from_json(file_path, chart_path, chart_type, chart_title):
-    """从 JSON 文件生成图表"""
-
-    with open(file_path, 'r') as f:
-        data = json.load(f)
+def generate_chart(parse_file_result ,chart_path, chart_type, chart_title):
+    """根据解析结果生成图表"""
+    data = parse_file_result['data']
+    header = parse_file_result['header']
 
     # 生成图表
     fig = plt.figure(dpi=128, figsize=(10, 6))
 
-    # 简单的 JSON 数据处理
-    if isinstance(data, list) and len(data) > 0:
-        if isinstance(data[0], dict):
-            keys = list(data[0].keys())
-            if len(keys) >= 2:
-                x_labels = [item[keys[0]] for item in data[:10]]
-                y_values = [item[keys[1]] for item in data[:10]]
+    if chart_type == 'line' or chart_type == 'bar':
+        # 假设第一列是标签，第二列是数值
+        x_labels = [row[0] for row in data[:10]]  # 只显示前10个
+        y_values = [float(row[1]) for row in data[:10]] if len(data[0]) > 1 else list(range(len(data[:10])))
 
-                if chart_type == 'line':
-                    plt.plot(x_labels, y_values, marker='o')
-                elif chart_type == 'bar':
-                    plt.bar(x_labels, y_values)
-                elif chart_type == 'scatter':
-                    x_values = [float(item[keys[1]]) for item in data[:50]]
-                    y_values = [float(item[keys[2]]) for item in data[:50]] if len(keys) >= 3 else list(range(len(x_values)))
-                    plt.scatter(x_values, y_values)
-                elif chart_type == 'histogram':
-                    plt.hist(y_values, bins=20)
-                elif chart_type == 'pie':
-                    plt.pie(y_values, labels=x_labels, autopct='%1.1f%%')
+        if chart_type == 'line':
+            plt.plot(x_labels, y_values, marker='o')
         else:
-            plt.plot(data)
+            plt.bar(x_labels, y_values)
+
+    elif chart_type == 'scatter':
+        x_values = [float(row[1]) for row in data[:50]] if len(data[0]) > 1 else list(range(len(data[:50])))
+        y_values = [float(row[2]) for row in data[:50]] if len(data[0]) > 2 else list(range(len(data[:50])))
+        plt.scatter(x_values, y_values)
+
+    elif chart_type == 'histogram':
+        values = [float(row[1]) for row in data if len(row) > 1]
+        plt.hist(values, bins=20)
+
+    elif chart_type == 'pie':
+        labels = [row[0] for row in data[:10]]
+        values = [float(row[1]) for row in data[:10]] if len(data[0]) > 1 else [1] * len(labels)
+        plt.pie(values, labels=labels, autopct='%1.1f%%')
 
     plt.title(chart_title, fontsize=16)
+    plt.xlabel(header[0] if len(header) > 0 else 'X')
+    if header and len(header) > 1:
+        plt.ylabel(header[1])
+
+    plt.xticks(rotation=45)
     plt.tight_layout()
 
     plt.savefig(chart_path, bbox_inches='tight')
