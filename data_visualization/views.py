@@ -86,13 +86,6 @@ def handle_data_processing(request, file_path, chart_title, description, chart_t
     chart_path = os.path.join(charts_dir, chart_filename)
     
     try:
-        # # 读取数据并生成图表
-        # if file_path.endswith('.json'):
-        #     generate_chart_from_json(file_path, chart_path, chart_type, chart_title)
-        # else:
-        #     # 默认为 CSV 处理
-        #     generate_chart_from_csv(file_path, chart_path, chart_type, chart_title)
-
         parse_file_result = parse_file(file_path)
         generate_chart(parse_file_result, chart_path, chart_type, chart_title)
 
@@ -125,54 +118,72 @@ def parse_file(file_path):
     """文件解析"""
     result = {
         'data': [],
-        'header':None
+        'header': None,
+        'file_type': None,
+        'detal_state':True,
+        'error_message': ''
     }
-
-    if file_path.endswith('.json'):
-        with open(file_path, 'r')  as f:
-            result['data'] = json.load(f)
-    elif file_path.endswith('.csv'):
-        with open(file_path, 'r') as f:
-            reader = csv.reader(f)
-            result['header'] = next(reader)  
-            result['data'] = [row for row in reader]
-    else:
-        ext = os.path.splitext(file_path)[1]
-        print(f"暂不支持 {ext} 文件类型解析")
+    try:
+        if file_path.endswith('.json'):
+            with open(file_path, 'r')  as f:
+                result['data'] = json.load(f)
+                result['file_type'] = 'json'
+        elif file_path.endswith('.csv'):
+            with open(file_path, 'r') as f:
+                reader = csv.reader(f)
+                result['header'] = next(reader)  
+                result['data'] = [row for row in reader]
+                result['file_type'] = 'csv'
+        else:
+            ext = os.path.splitext(file_path)[1]
+            result['detal_state'] = False
+            result['error_message'] = f"暂不支持 {ext} 文件类型解析"
+    except Exception as e:
+            result['detal_state'] = False
+            result['error_message'] = str(e)
 
     return result
+
+def safe_float_convert(value, default=0):
+    """安全地将值转换为浮点数"""
+    if value == '' or value is None:
+        return default
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
 
 def generate_chart(parse_file_result ,chart_path, chart_type, chart_title):
     """根据解析结果生成图表"""
     data = parse_file_result['data']
     header = parse_file_result['header']
 
+    # 数据验证
+    if not data:
+        raise ValueError("数据为空")
+
+    # 统一数据格式为字典
+    if isinstance(data[0], dict):
+        keys = list(data[0].keys())
+        data = [[row.get(k, i) for k in keys] for i, row in enumerate(data)]
+    
+    # 提取数据
+    x_values = [row[0] for row in data[:10]]
+    y_values = [safe_float_convert(row[1]) for row in data[:50] if len(row) > 1]
+    
+    # 图表类型的到函数映射
+    plotter = {
+        'line': lambda: plt.plot(x_values, y_values[:10], marker='o'),
+        'bar': lambda: plt.bar(x_values, y_values[:10]),
+        'scatter': lambda: plt.scatter([float(row[1]) for row in data[:50]], 
+                                    [float(row[2]) for row in data[:50]] if len(data[0]) > 2 else list(range(50))),
+        'histogram': lambda: plt.hist(y_values, bins=20),
+        'pie': lambda: plt.pie(y_values[:10], labels=x_values, autopct='%1.1f%%')
+    }    
+    
     # 生成图表
     fig = plt.figure(dpi=128, figsize=(10, 6))
-
-    if chart_type == 'line' or chart_type == 'bar':
-        # 假设第一列是标签，第二列是数值
-        x_labels = [row[0] for row in data[:10]]  # 只显示前10个
-        y_values = [float(row[1]) for row in data[:10]] if len(data[0]) > 1 else list(range(len(data[:10])))
-
-        if chart_type == 'line':
-            plt.plot(x_labels, y_values, marker='o')
-        else:
-            plt.bar(x_labels, y_values)
-
-    elif chart_type == 'scatter':
-        x_values = [float(row[1]) for row in data[:50]] if len(data[0]) > 1 else list(range(len(data[:50])))
-        y_values = [float(row[2]) for row in data[:50]] if len(data[0]) > 2 else list(range(len(data[:50])))
-        plt.scatter(x_values, y_values)
-
-    elif chart_type == 'histogram':
-        values = [float(row[1]) for row in data if len(row) > 1]
-        plt.hist(values, bins=20)
-
-    elif chart_type == 'pie':
-        labels = [row[0] for row in data[:10]]
-        values = [float(row[1]) for row in data[:10]] if len(data[0]) > 1 else [1] * len(labels)
-        plt.pie(values, labels=labels, autopct='%1.1f%%')
+    plotter.get(chart_type, lambda: None)()
 
     plt.title(chart_title, fontsize=16)
     plt.xlabel(header[0] if len(header) > 0 else 'X')
