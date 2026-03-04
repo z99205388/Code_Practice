@@ -13,6 +13,8 @@ db.sqlite3-journal
 
 # Environments
 .env
+.env.local
+secret_key.env
 .venv
 env/
 venv/
@@ -33,3 +35,6 @@ Thumbs.db
 # Media and static (if using collectstatic)
 /media/
 /staticfiles/
+
+# DOCS
+*.md
