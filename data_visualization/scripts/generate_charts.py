@@ -8,6 +8,7 @@
 
 import os
 import sys
+
 import django
 
 # 获取 Learning_Log 项目目录
@@ -19,8 +20,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'learning_log.settings')
 django.setup()
 
 from data_visualization.models import Chart
-from data_visualization.scripts.temperature_chart import generate_temperature_chart
 from data_visualization.scripts.random_walk_chart import generate_random_walk_chart
+from data_visualization.scripts.temperature_chart import generate_temperature_chart
+
 
 def main():
     print("开始生成数据可视化图表...")
@@ -34,7 +36,7 @@ def main():
     try:
         temp_chart_info = generate_temperature_chart()
         Chart.objects.create(**temp_chart_info)
-        print(f"✓ 温度图表已生成并保存")
+        print("✓ 温度图表已生成并保存")
     except Exception as e:
         print(f"✗ 温度图表生成失败: {e}")
 
@@ -43,7 +45,7 @@ def main():
     try:
         rw_chart_info = generate_random_walk_chart()
         Chart.objects.create(**rw_chart_info)
-        print(f"✓ 随机漫步图表已生成并保存")
+        print("✓ 随机漫步图表已生成并保存")
     except Exception as e:
         print(f"✗ 随机漫步图表生成失败: {e}")
 

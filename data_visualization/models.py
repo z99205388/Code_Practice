@@ -2,8 +2,10 @@ from django.db import models
 
 # Create your models here.
 
+
 class Chart(models.Model):
     """数据可视化图表"""
+
     title = models.CharField(max_length=200)
     description = models.TextField()
     category = models.CharField(max_length=100)  # 图表类别：温度、随机漫步等

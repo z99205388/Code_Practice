@@ -1,9 +1,12 @@
 import csv
+
 import matplotlib
+
 matplotlib.use('Agg')  # 使用非交互式后端
-from matplotlib import pyplot as plt
-from datetime import datetime
 import os
+from datetime import datetime
+
+from matplotlib import pyplot as plt
 
 # 设置图表保存目录
 CHART_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media', 'charts')
@@ -62,7 +65,7 @@ def generate_temperature_chart():
         'title': 'Death Valley Temperatures 2014',
         'description': 'Daily high and low temperatures recorded in Death Valley, California throughout 2014. This chart visualizes the extreme temperature fluctuations characteristic of this desert location.',
         'category': 'Temperature',
-        'image_path': f'/media/charts/death_valley_temperatures.png',
+        'image_path': '/media/charts/death_valley_temperatures.png',
         'data_file': f'{filename}',
         'script_file': 'data_visualization/scripts/temperature_chart.py'
     }

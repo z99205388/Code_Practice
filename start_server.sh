@@ -1,24 +1,14 @@
 #!/bin/bash
 
-# Django Data Visualization - 快速启动脚本
+# Django Learning Log - 快速启动脚本 (使用 uv)
 
 echo "================================================"
-echo "   Data Visualization - 快速启动脚本"
+echo "   Learning Log - 快速启动脚本"
 echo "================================================"
 echo ""
 
 # 进入项目目录
-cd /home/ubuntu/Code/Code_Practice/Learning_Log
-
-# 检查虚拟环境
-if [ ! -d "ll_env" ]; then
-    echo "❌ 错误：虚拟环境 ll_env 不存在！"
-    echo "请先创建虚拟环境。"
-    exit 1
-fi
-
-echo "✅ 虚拟环境检查完成"
-echo ""
+cd "$(dirname "$0")"
 
 # 检查必要的目录
 if [ ! -d "media/uploads" ]; then
@@ -34,13 +24,9 @@ fi
 echo "✅ 目录检查完成"
 echo ""
 
-# 激活虚拟环境
-echo "🔄 激活虚拟环境..."
-source ll_env/bin/activate
-
-# 运行数据库检查
+# 使用 uv 运行 Django 检查
 echo "🔍 检查数据库..."
-python manage.py check
+uv run --python 3.11 python manage.py check
 
 if [ $? -ne 0 ]; then
     echo "❌ 数据库检查失败！"
@@ -61,13 +47,14 @@ echo "  - http://127.0.0.1:8000"
 echo "  - http://0.0.0.0:8000"
 echo ""
 echo "重要页面："
-echo "  - 数据可视化主页：http://localhost:8000/data_visualization/"
-echo "  - 数据处理页面：http://localhost:8000/data_visualization/process/"
-echo "  - 所有图表：http://localhost:8000/data_visualization/charts/"
+echo "  - 首页：http://localhost:8000/"
+echo "  - 学习日志：http://localhost:8000/learning_logs/"
+echo "  - 数据可视化：http://localhost:8000/data_visualization/"
+echo "  - 管理后台：http://localhost:8000/admin/"
 echo ""
 echo "按 Ctrl+C 停止服务器"
 echo "================================================"
 echo ""
 
-# 启动开发服务器
-python manage.py runserver 0.0.0.0:8000
+# 启动开发服务器 (使用 uv run)
+uv run --python 3.11 python manage.py runserver 0.0.0.0:8000

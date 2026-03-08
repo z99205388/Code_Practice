@@ -5,8 +5,8 @@
 运行此脚本将生成图表图片并保存到 media/charts 目录
 """
 
-import os
 import csv
+import os
 import sys
 from datetime import datetime
 
@@ -15,8 +15,10 @@ DATA_DIR = '/home/ubuntu/Code/Code_Practice/Data_Visuallization'
 CHART_DIR = '/home/ubuntu/Code/Code_Practice/Learning_Log/media/charts'
 
 import matplotlib
+
 matplotlib.use('Agg')  # 使用非交互式后端
 import matplotlib.pyplot as plt
+
 
 def ensure_chart_dir():
     """确保图表目录存在"""

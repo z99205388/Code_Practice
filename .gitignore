@@ -36,5 +36,16 @@ Thumbs.db
 /media/
 /staticfiles/
 
+# Testing and coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
 # DOCS
 *.md
