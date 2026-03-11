@@ -1,60 +1,87 @@
-{% extends "data_visualization/base.html" %}
+{% extends "learning_logs/base.html" %}
+
+{% block title %}数据可视化{% endblock title %}
+{% block nav_charts %}active{% endblock nav_charts %}
 
 {% block header %}
-<h1>Data Visualization Gallery</h1>
 {% endblock header %}
 
 {% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <h1>数据可视化图库</h1>
+    <p>探索使用 Python 和 Matplotlib 创建的精美数据可视化作品</p>
+</div>
+
+<!-- Process Data Card -->
 <div class="panel panel-success">
-<div class="panel-heading">
-<h3 class="panel-title">Process Your Data</h3>
-</div>
-<div class="panel-body">
-<p>Upload or select a data file to create custom visualizations.</p>
-<a href="{% url 'data_visualization:process_data' %}" class="btn btn-success btn-lg">
-<span class="glyphicon glyphicon-cog" aria-hidden="true"></span> 执行处理
-</a>
-</div>
-</div>
-
-<p>Welcome to the Data Visualization Gallery! Here you can explore various data visualization projects generated using Python and matplotlib.</p>
-
-<div class="panel panel-default">
-<div class="panel-heading">
-<h3 class="panel-title">Categories</h3>
-</div>
-<div class="panel-body">
-<ul>
-{% for category in categories %}
-<li><strong>{{ category }}</strong></li>
-{% endfor %}
-</ul>
-</div>
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+            数据处理工具
+        </h3>
+    </div>
+    <div class="panel-body">
+        <p>上传数据文件或选择本地文件来创建自定义可视化图表。</p>
+        <a href="{% url 'data_visualization:process_data' %}" class="btn btn-success btn-lg">
+            <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+            开始处理数据
+        </a>
+    </div>
 </div>
 
-<div class="panel panel-primary">
-<div class="panel-heading">
-<h3 class="panel-title">All Charts</h3>
+<!-- Categories Section -->
+<div class="card mt-lg">
+    <div class="card-header">
+        <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+        图表分类
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-md-4 col-sm-6">
+                <span class="label label-primary">{{ category }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
-<div class="panel-body">
-<div class="row">
-{% for chart in charts %}
-<div class="col-md-4">
-<div class="thumbnail">
-<a href="{% url 'data_visualization:chart_detail' chart.id %}">
-<img src="{{ chart.image_path }}" alt="{{ chart.title }}" class="img-responsive">
-</a>
-<div class="caption">
-<h4>{{ chart.title }}</h4>
-<p><span class="label label-default">{{ chart.category }}</span></p>
-<p class="text-muted">{{ chart.date_added|date:"M d, Y" }}</p>
-</div>
-</div>
-</div>
-{% empty %}
-<p>No charts available yet.</p>
-{% endfor %}
-</div>
-</div>
+
+<!-- Charts Gallery -->
+<div class="mt-xl">
+    <div class="page-header">
+        <h2>所有图表</h2>
+    </div>
+
+    {% if charts %}
+    <div class="chart-grid">
+        {% for chart in charts %}
+        <div class="chart-card">
+            <div class="chart-card-image">
+                <a href="{% url 'data_visualization:chart_detail' chart.id %}">
+                    <img src="{{ chart.image_path }}" alt="{{ chart.title }}">
+                </a>
+            </div>
+            <div class="chart-card-content">
+                <h4 class="chart-card-title">
+                    <a href="{% url 'data_visualization:chart_detail' chart.id %}">{{ chart.title }}</a>
+                </h4>
+                <div class="chart-card-meta">
+                    <span class="label label-default">{{ chart.category }}</span>
+                    <span>{{ chart.date_added|date:"Y年m月d日" }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+        </div>
+        <h3>暂无图表</h3>
+        <p>图库中还没有任何图表，请先添加一些数据可视化内容。</p>
+    </div>
+    {% endif %}
 </div>
 {% endblock content %}

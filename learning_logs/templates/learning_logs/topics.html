@@ -1,20 +1,49 @@
 {% extends "learning_logs/base.html" %}
+
+{% block title %}主题列表{% endblock title %}
+{% block nav_topics %}active{% endblock nav_topics %}
+
 {% block header %}
-<h1>Topics</h1>
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>我的学习主题</h1>
+            <p class="text-secondary">管理和浏览你的所有学习主题</p>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{% url 'learning_logs:new_topic' %}" class="btn btn-primary btn-lg">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                添加新主题
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock header %}
+
 {% block content %}
-<ul>
-{% for topic in topics %}
-<li>
-<h3>
-<a href="{% url 'learning_logs:topic' topic.id %}">{{ topic }}</a>
-</h3>
-</li>
-{% empty %}
-<li>No topics have been added yet.</li>
-{% endfor %}
+{% if topics %}
+<ul class="topic-list">
+    {% for topic in topics %}
+    <li class="topic-list-item">
+        <div>
+            <a href="{% url 'learning_logs:topic' topic.id %}">{{ topic }}</a>
+        </div>
+        <div class="topic-date">
+            {{ topic.date_added|date:'Y年m月d日' }}
+        </div>
+    </li>
+    {% endfor %}
 </ul>
-
-<h3><a href="{% url 'learning_logs:new_topic' %}">Add new topic</h3>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
+    </div>
+    <h3>还没有学习主题</h3>
+    <p>开始创建你的第一个学习主题吧！</p>
+    <a href="{% url 'learning_logs:new_topic' %}" class="btn btn-primary">
+        <span class="glyphicon glyphicon-plus"></span> 添加主题
+    </a>
+</div>
+{% endif %}
 {% endblock content %}
-

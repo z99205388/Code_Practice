@@ -1,52 +1,111 @@
 {% load bootstrap3 %}
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Learning Log</title>
-{% bootstrap_css %}
-{% bootstrap_javascript %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Learning Log{% endblock title %} - 学习笔记</title>
+    {% bootstrap_css %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock extra_css %}
 </head>
 <body>
-<!-- Static navbar -->
-<nav class="navbar navbar-default navbar-static-top">
-<div class="container">
-<div class="navbar-header">
-<button type="button" class="navbar-toggle collapsed"
-data-toggle="collapse" data-target="#navbar"
-aria-expanded="false" aria-controls="navbar">
-</button>
-<a class="navbar-brand" href="{% url 'learning_logs:index' %}">
-Learning Log</a>
-</div>
+    <!-- 动态背景层 -->
+    <div class="animated-gradient"></div>
+    <div class="bg-grid"></div>
+    <div id="glow-container"></div>
+    <div id="particles-container"></div>
 
-<div id="navbar" class="navbar-collapse collapse">
-<ul class="nav navbar-nav">
-<li><a href="{% url 'learning_logs:topics' %}">Topics</a></li>
-<li><a href="{% url 'data_visualization:index' %}">Data Visualization</a></li>
-</ul>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-default navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed"
+                        data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% url 'learning_logs:index' %}">
+                    <span class="brand-icon">L</span>
+                    Learning Log
+                </a>
+            </div>
 
-<ul class="nav navbar-nav navbar-right">
-{% if user.is_authenticated %}
-<li><a>Hello, {{ user.username }}.</a></li>
-<li><a href="{% url 'users:logout' %}">log out</a></li>
-{% else %}
-<li><a href="{% url 'users:register' %}">register</a></li>
-<li><a href="{% url 'users:login' %}">log in</a></li>
-{% endif %}
-</ul>
-</div><!--/.nav-collapse -->
-</div>
-</nav>
-<div class="container">
-<div class="page-header">
-{% block header %}{% endblock header %}
-</div>
-<div>
-{% block content %}{% endblock content %}
-</div>
-</div> <!-- /container -->
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="{% block nav_topics %}{% endblock nav_topics %}">
+                        <a href="{% url 'learning_logs:topics' %}">
+                            <span class="glyphicon glyphicon-book" aria-hidden="true"></span>
+                            主题列表
+                        </a>
+                    </li>
+                    <li class="{% block nav_charts %}{% endblock nav_charts %}">
+                        <a href="{% url 'data_visualization:index' %}">
+                            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                            数据可视化
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_authenticated %}
+                        <li><a><span class="glyphicon glyphicon-user"></span> {{ user.username }}</a></li>
+                        <li><a href="{% url 'users:logout' %}">
+                            <span class="glyphicon glyphicon-log-out"></span> 退出
+                        </a></li>
+                    {% else %}
+                        <li><a href="{% url 'users:register' %}">
+                            <span class="glyphicon glyphicon-user"></span> 注册
+                        </a></li>
+                        <li><a href="{% url 'users:login' %}">
+                            <span class="glyphicon glyphicon-log-in"></span> 登录
+                        </a></li>
+                    {% endif %}
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block header %}{% endblock header %}
+
+            {% block content %}{% endblock content %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    &copy; {% now "Y" %} Learning Log. 学习记录你的成长。
+                </div>
+                <div class="footer-links">
+                    <a href="{% url 'learning_logs:index' %}">首页</a>
+                    <a href="{% url 'learning_logs:topics' %}">主题</a>
+                    <a href="{% url 'data_visualization:index' %}">数据可视化</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% bootstrap_javascript %}
+    <script src="{% static 'js/particles.js' %}"></script>
+    {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>

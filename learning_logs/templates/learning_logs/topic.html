@@ -1,29 +1,63 @@
 {% extends 'learning_logs/base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}{{ topic }}{% endblock title %}
+{% block nav_topics %}active{% endblock nav_topics %}
+
 {% block header %}
-<h2>{{ topic }}</h2>
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ topic }}</h1>
+            <p class="text-secondary">创建于 {{ topic.date_added|date:'Y年m月d日 H:i' }}</p>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{% url 'learning_logs:new_entry' topic.id %}" class="btn btn-primary">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                添加新条目
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock header %}
+
 {% block content %}
-<p>
-<a href="{% url 'learning_logs:new_entry' topic.id %}">add new entry</a>
-</p>
-{% for entry in entries %}
-<div class="panel panel-default">
-<div class="panel-heading">
-<h3>
-{{ entry.date_added|date:'M d, Y H:i' }}
-<small>
-<a href="{% url 'learning_logs:edit_entry' entry.id %}">
-edit entry</a>
-</small>
-</h3>
+{% if entries %}
+    {% for entry in entries %}
+    <div class="entry-card">
+        <div class="entry-card-header">
+            <h3 class="entry-date">
+                <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+                {{ entry.date_added|date:'Y年m月d日 H:i' }}
+            </h3>
+            <div class="entry-actions">
+                <a href="{% url 'learning_logs:edit_entry' entry.id %}">
+                    <span class="glyphicon glyphicon-edit"></span>
+                    编辑
+                </a>
+            </div>
+        </div>
+        <div class="entry-card-body">
+            {{ entry.text|linebreaks }}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+    </div>
+    <h3>还没有学习条目</h3>
+    <p>为这个主题添加第一条学习笔记吧！</p>
+    <a href="{% url 'learning_logs:new_entry' topic.id %}" class="btn btn-primary">
+        <span class="glyphicon glyphicon-plus"></span> 添加条目
+    </a>
 </div>
-<div class="panel-body">
-{{ entry.text|linebreaks }}
+{% endif %}
+
+<div class="mt-lg">
+    <a href="{% url 'learning_logs:topics' %}" class="btn btn-secondary">
+        <span class="glyphicon glyphicon-arrow-left"></span> 返回主题列表
+    </a>
 </div>
-</div> <!-- panel -->
-{% empty %}
-There are no entries for this topic yet.
-{% endfor %}
 {% endblock content %}
-
-

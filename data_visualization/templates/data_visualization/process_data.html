@@ -1,106 +1,129 @@
-{% extends "data_visualization/base.html" %}
+{% extends "learning_logs/base.html" %}
+
+{% block title %}处理数据{% endblock title %}
+{% block nav_charts %}active{% endblock nav_charts %}
 
 {% block header %}
-<h1>Process Your Data</h1>
+<div class="page-header">
+    <h1>数据处理工具</h1>
+    <p class="text-secondary">上传数据文件或选择本地文件来创建自定义可视化图表</p>
+</div>
 {% endblock header %}
 
 {% block content %}
 <div class="panel panel-primary">
-<div class="panel-heading">
-<h3 class="panel-title">Select Data Source</h3>
-</div>
-<div class="panel-body">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
+            选择数据源
+        </h3>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <!-- Upload File -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
+                        上传文件
+                    </div>
+                    <div class="card-body">
+                        <p class="text-secondary">从本地计算机选择数据文件（CSV、JSON 等）</p>
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="id_file">数据文件：</label>
+                                <input type="file" name="data_file" id="id_file" class="form-control" accept=".csv,.json,.txt">
+                                <p class="help-block">支持格式：CSV、JSON、TXT</p>
+                            </div>
 
-<div class="row">
-<div class="col-md-6">
-<h4>Upload a File</h4>
-<p>Select a data file from your local computer (CSV, JSON, etc.)</p>
-<form method="post" enctype="multipart/form-data" class="well">
-{% csrf_token %}
-<div class="form-group">
-<label for="id_file">Data File:</label>
-<input type="file" name="data_file" id="id_file" class="form-control" accept=".csv,.json,.txt">
-<p class="help-block">Supported formats: CSV, JSON, TXT</p>
+                            <div class="form-group">
+                                <label for="id_chart_type">图表类型：</label>
+                                <select name="chart_type" id="id_chart_type" class="form-control">
+                                    <option value="line">折线图</option>
+                                    <option value="bar">柱状图</option>
+                                    <option value="scatter">散点图</option>
+                                    <option value="histogram">直方图</option>
+                                    <option value="pie">饼图</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_chart_title">图表标题：</label>
+                                <input type="text" name="chart_title" id="id_chart_title" class="form-control" placeholder="输入图表标题" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_description">描述：</label>
+                                <textarea name="description" id="id_description" class="form-control" rows="3" placeholder="描述你的数据和图表"></textarea>
+                            </div>
+
+                            <button type="submit" name="action" value="upload" class="btn btn-primary btn-block">
+                                <span class="glyphicon glyphicon-upload"></span> 上传并处理
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Local File Path -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="glyphicon glyphicon-hdd" aria-hidden="true"></span>
+                        使用本地文件路径
+                    </div>
+                    <div class="card-body">
+                        <p class="text-secondary">输入服务器上数据文件的完整路径</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="id_file_path">文件路径：</label>
+                                <input type="text" name="file_path" id="id_file_path" class="form-control"
+                                       placeholder="/path/to/your/data/file.csv" value="/home/ubuntu/Code/Code_Practice/Data_Visuallization/plot_temperatures/death_valley_2014.csv">
+                                <p class="help-block">服务器上数据文件的完整路径</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_chart_type2">图表类型：</label>
+                                <select name="chart_type" id="id_chart_type2" class="form-control">
+                                    <option value="line">折线图</option>
+                                    <option value="bar">柱状图</option>
+                                    <option value="scatter">散点图</option>
+                                    <option value="histogram">直方图</option>
+                                    <option value="pie">饼图</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_chart_title2">图表标题：</label>
+                                <input type="text" name="chart_title" id="id_chart_title2" class="form-control" placeholder="输入图表标题" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_description2">描述：</label>
+                                <textarea name="description" id="id_description2" class="form-control" rows="3" placeholder="描述你的数据和图表"></textarea>
+                            </div>
+
+                            <button type="submit" name="action" value="process" class="btn btn-success btn-block">
+                                <span class="glyphicon glyphicon-play"></span> 处理文件
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-lg">
+            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+            <strong>提示：</strong>对于 CSV 文件，第一行应包含列标题。图表将根据数据结构自动生成。
+        </div>
+    </div>
 </div>
 
-<div class="form-group">
-<label for="id_chart_type">Chart Type:</label>
-<select name="chart_type" id="id_chart_type" class="form-control">
-<option value="line">Line Chart</option>
-<option value="bar">Bar Chart</option>
-<option value="scatter">Scatter Plot</option>
-<option value="histogram">Histogram</option>
-<option value="pie">Pie Chart</option>
-</select>
+<div class="mt-lg">
+    <a href="{% url 'data_visualization:index' %}" class="btn btn-secondary">
+        <span class="glyphicon glyphicon-arrow-left"></span> 返回图库
+    </a>
 </div>
-
-<div class="form-group">
-<label for="id_chart_title">Chart Title:</label>
-<input type="text" name="chart_title" id="id_chart_title" class="form-control" placeholder="Enter chart title" required>
-</div>
-
-<div class="form-group">
-<label for="id_description">Description:</label>
-<textarea name="description" id="id_description" class="form-control" rows="3" placeholder="Describe your data and chart"></textarea>
-</div>
-
-<button type="submit" name="action" value="upload" class="btn btn-primary btn-block">
-<span class="glyphicon glyphicon-upload"></span> Upload & Process
-</button>
-</form>
-</div>
-
-<div class="col-md-6">
-<h4>Or Use Local File Path</h4>
-<p>Enter the full path to a data file on the server</p>
-<form method="post" class="well">
-{% csrf_token %}
-<div class="form-group">
-<label for="id_file_path">File Path:</label>
-<input type="text" name="file_path" id="id_file_path" class="form-control"
-       placeholder="/path/to/your/data/file.csv" value="/home/ubuntu/Code/Code_Practice/Data_Visuallization/plot_temperatures/death_valley_2014.csv">
-<p class="help-block">Full path to the data file on the server</p>
-</div>
-
-<div class="form-group">
-<label for="id_chart_type2">Chart Type:</label>
-<select name="chart_type" id="id_chart_type2" class="form-control">
-<option value="line">Line Chart</option>
-<option value="bar">Bar Chart</option>
-<option value="scatter">Scatter Plot</option>
-<option value="histogram">Histogram</option>
-<option value="pie">Pie Chart</option>
-</select>
-</div>
-
-<div class="form-group">
-<label for="id_chart_title2">Chart Title:</label>
-<input type="text" name="chart_title" id="id_chart_title2" class="form-control" placeholder="Enter chart title" required>
-</div>
-
-<div class="form-group">
-<label for="id_description2">Description:</label>
-<textarea name="description" id="id_description2" class="form-control" rows="3" placeholder="Describe your data and chart"></textarea>
-</div>
-
-<button type="submit" name="action" value="process" class="btn btn-success btn-block">
-<span class="glyphicon glyphicon-play"></span> Process File
-</button>
-</form>
-</div>
-</div>
-
-<div class="alert alert-info">
-<strong>Tip:</strong> For CSV files, the first row should contain column headers. Charts will be automatically generated based on the data structure.
-</div>
-
-</div>
-</div>
-
-<div class="text-center">
-<a href="{% url 'data_visualization:index' %}" class="btn btn-default">
-<span class="glyphicon glyphicon-arrow-left"></span> Back to Gallery
-</a>
-</div>
-
 {% endblock content %}

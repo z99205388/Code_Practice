@@ -1,10 +1,35 @@
 {% extends "learning_logs/base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}注册{% endblock title %}
+
+{% block header %}
+{% endblock header %}
 
 {% block content %}
-<h2>Register</h2>
-<form method="post" action="{% url 'users:register' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button name="submit">Register</button>
-</form>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>创建账号</h2>
+            <p>注册一个新账号，开始记录你的学习旅程。</p>
+        </div>
+
+        <form method="post" action="{% url 'users:register' %}" class="form">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+
+            <div class="form-group">
+                <button name="submit" class="btn btn-primary btn-lg btn-block">
+                    <span class="glyphicon glyphicon-user"></span>
+                    注册
+                </button>
+            </div>
+        </form>
+
+        <div class="auth-footer">
+            已有账号？
+            <a href="{% url 'users:login' %}">立即登录</a>
+        </div>
+    </div>
+</div>
 {% endblock content %}

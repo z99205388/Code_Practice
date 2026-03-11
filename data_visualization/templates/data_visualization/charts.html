@@ -1,37 +1,60 @@
-{% extends "data_visualization/base.html" %}
+{% extends "learning_logs/base.html" %}
+
+{% block title %}所有图表{% endblock title %}
+{% block nav_charts %}active{% endblock nav_charts %}
 
 {% block header %}
-<h1>All Data Visualization Charts</h1>
+<div class="page-header">
+    <h1>所有数据可视化图表</h1>
+    <p class="text-secondary">浏览系统中所有可用的数据可视化图表</p>
+</div>
 {% endblock header %}
 
 {% block content %}
-<p>Below is a comprehensive list of all data visualization charts in the system.</p>
-
+{% if charts %}
 <div class="row">
-{% for chart in charts %}
-<div class="col-md-6">
-<div class="panel panel-default">
-<div class="panel-heading">
-<h4>{{ chart.title }}</h4>
+    {% for chart in charts %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                {{ chart.title }}
+            </div>
+            <div class="card-body">
+                <div class="thumbnail">
+                    <a href="{% url 'data_visualization:chart_detail' chart.id %}">
+                        <img src="{{ chart.image_path }}" alt="{{ chart.title }}" class="img-responsive">
+                    </a>
+                </div>
+                <p class="mt-md">
+                    <span class="label label-primary">{{ chart.category }}</span>
+                    <span class="text-secondary ml-sm">{{ chart.date_added|date:"Y年m月d日 H:i" }}</span>
+                </p>
+                <p>{{ chart.description|truncatewords:30 }}</p>
+                <a href="{% url 'data_visualization:chart_detail' chart.id %}" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-eye-open"></span> 查看详情
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
-<div class="panel-body">
-<div class="thumbnail">
-<img src="{{ chart.image_path }}" alt="{{ chart.title }}" class="img-responsive">
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+    </div>
+    <h3>暂无图表</h3>
+    <p>系统中还没有任何图表，请先添加数据可视化内容。</p>
+    <a href="{% url 'data_visualization:process_data' %}" class="btn btn-primary">
+        <span class="glyphicon glyphicon-plus"></span> 添加图表
+    </a>
 </div>
-<p><strong>Category:</strong> {{ chart.category }}</p>
-<p><strong>Date Added:</strong> {{ chart.date_added|date:"M d, Y H:i" }}</p>
-<p>{{ chart.description|truncatewords:30 }}</p>
-<a href="{% url 'data_visualization:chart_detail' chart.id %}" class="btn btn-primary">View Details</a>
-</div>
-</div>
-</div>
-{% empty %}
-<div class="col-md-12">
-<div class="alert alert-warning">
-<h4>No Charts Available</h4>
-<p>There are no charts to display. Please add some data visualization charts first.</p>
-</div>
-</div>
-{% endfor %}
+{% endif %}
+
+<div class="mt-lg">
+    <a href="{% url 'data_visualization:index' %}" class="btn btn-secondary">
+        <span class="glyphicon glyphicon-arrow-left"></span> 返回图库
+    </a>
 </div>
 {% endblock content %}

@@ -1,8 +1,27 @@
 {% extends "learning_logs/base.html" %}
 
+{% block title %}已退出{% endblock title %}
+
+{% block header %}
+{% endblock header %}
+
 {% block content %}
-<p>You have been logged out. Thank you for visiting!</p>
-<div class="text-center mt-3">
-    <a href="{% url 'learning_logs:index' %}" class="btn btn-primary">Return to Home Page</a>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>已成功退出</h2>
+            <p>感谢你的访问，期待下次再见！</p>
+        </div>
+
+        <div class="text-center">
+            <a href="{% url 'learning_logs:index' %}" class="btn btn-primary btn-lg">
+                <span class="glyphicon glyphicon-home"></span>
+                返回首页
+            </a>
+            <a href="{% url 'users:login' %}" class="btn btn-secondary btn-lg">
+                重新登录
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock content %}

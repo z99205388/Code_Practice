@@ -34,6 +34,7 @@ urlpatterns = [
     path("data_visualization/", include("data_visualization.urls", namespace="data_visualization")),
 ]
 
-# 在开发环境中提供媒体文件服务
+# 在开发环境中提供静态文件和媒体文件服务
 if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.BASE_DIR / "static")
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

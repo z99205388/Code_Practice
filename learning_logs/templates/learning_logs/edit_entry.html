@@ -1,10 +1,39 @@
 {% extends "learning_logs/base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}编辑条目{% endblock title %}
+{% block nav_topics %}active{% endblock nav_topics %}
+
+{% block header %}
+<div class="page-header">
+    <h1>编辑条目</h1>
+    <p class="text-secondary">
+        编辑主题 <strong>{{ topic }}</strong> 中的条目
+    </p>
+</div>
+{% endblock header %}
+
 {% block content %}
-<p><a href="{% url 'learning_logs:topic' topic.id %}">{{ topic }}</a></p>
-<p>Edit entry:</p>
-<form action="{% url 'learning_logs:edit_entry' entry.id %}" method='post'>
-{% csrf_token %}
-{{ form.as_p }}
-<button name="submit">save changes</button>
-</form>
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <div class="card">
+            <div class="card-body">
+                <form action="{% url 'learning_logs:edit_entry' entry.id %}" method="post">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
+
+                    <div class="form-group">
+                        <button name="submit" class="btn btn-primary btn-lg">
+                            <span class="glyphicon glyphicon-ok"></span>
+                            保存更改
+                        </button>
+                        <a href="{% url 'learning_logs:topic' topic.id %}" class="btn btn-secondary">
+                            取消
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}

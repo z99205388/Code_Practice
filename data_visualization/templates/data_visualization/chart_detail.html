@@ -1,52 +1,71 @@
-{% extends "data_visualization/base.html" %}
+{% extends "learning_logs/base.html" %}
+
+{% block title %}{{ chart.title }}{% endblock title %}
+{% block nav_charts %}active{% endblock nav_charts %}
 
 {% block header %}
-<h1>{{ chart.title }}</h1>
+<div class="page-header">
+    <h1>{{ chart.title }}</h1>
+    <p class="text-secondary">
+        <span class="label label-primary">{{ chart.category }}</span>
+        <span class="ml-sm">{{ chart.date_added|date:"Y年m月d日" }}</span>
+    </p>
+</div>
 {% endblock header %}
 
 {% block content %}
 <div class="row">
-<div class="col-md-8">
-<div class="thumbnail">
-<img src="{{ chart.image_path }}" alt="{{ chart.title }}" class="img-responsive">
-</div>
-</div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="thumbnail" style="border: none; margin-bottom: 0;">
+                    <img src="{{ chart.image_path }}" alt="{{ chart.title }}" class="img-responsive">
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="col-md-4">
-<div class="panel panel-default">
-<div class="panel-heading">
-<h3>Chart Details</h3>
-</div>
-<div class="panel-body">
-<dl class="dl-horizontal">
-<dt>Category:</dt>
-<dd>{{ chart.category }}</dd>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                图表详情
+            </div>
+            <div class="card-body">
+                <dl class="dl-horizontal">
+                    <dt>分类：</dt>
+                    <dd>{{ chart.category }}</dd>
 
-<dt>Date Added:</dt>
-<dd>{{ chart.date_added|date:"F d, Y" }}</dd>
+                    <dt>添加日期：</dt>
+                    <dd>{{ chart.date_added|date:"Y年m月d日 H:i" }}</dd>
 
-<dt>Data File:</dt>
-<dd>{{ chart.data_file|default:"Not specified" }}</dd>
+                    <dt>数据文件：</dt>
+                    <dd>{{ chart.data_file|default:"未指定" }}</dd>
 
-<dt>Script File:</dt>
-<dd>{{ chart.script_file }}</dd>
-</dl>
-</div>
-</div>
+                    <dt>脚本文件：</dt>
+                    <dd>{{ chart.script_file }}</dd>
+                </dl>
+            </div>
+        </div>
 
-<div class="panel panel-info">
-<div class="panel-heading">
-<h3>Description</h3>
-</div>
-<div class="panel-body">
-<p>{{ chart.description }}</p>
-</div>
-</div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+                描述
+            </div>
+            <div class="panel-body">
+                <p>{{ chart.description }}</p>
+            </div>
+        </div>
 
-<div class="btn-group-vertical" style="width: 100%;">
-<a href="{% url 'data_visualization:index' %}" class="btn btn-default btn-block">Back to Gallery</a>
-<a href="{% url 'data_visualization:charts' %}" class="btn btn-default btn-block">All Charts</a>
-</div>
-</div>
+        <div class="btn-group-vertical" style="width: 100%;">
+            <a href="{% url 'data_visualization:index' %}" class="btn btn-secondary">
+                <span class="glyphicon glyphicon-arrow-left"></span> 返回图库
+            </a>
+            <a href="{% url 'data_visualization:charts' %}" class="btn btn-secondary">
+                <span class="glyphicon glyphicon-list"></span> 所有图表
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock content %}

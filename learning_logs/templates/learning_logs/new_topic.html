@@ -1,18 +1,40 @@
 {% extends "learning_logs/base.html" %}
 {% load bootstrap3 %}
+
+{% block title %}添加新主题{% endblock title %}
+{% block nav_topics %}active{% endblock nav_topics %}
+
 {% block header %}
-<h2>Add a new topic:</h2>
+<div class="page-header">
+    <h1>添加新主题</h1>
+    <p class="text-secondary">创建一个新的学习主题来组织你的笔记</p>
+</div>
 {% endblock header %}
+
 {% block content %}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="card">
+            <div class="card-body">
+                <form action="{% url 'learning_logs:new_topic' %}" method="post" class="form">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
 
-<form action="{% url 'learning_logs:new_topic' %}" method='post'
-class="form">
-{% csrf_token %}
-{% bootstrap_form form %}
+                    <div class="form-group">
+                        <button name="submit" class="btn btn-primary btn-lg btn-block">
+                            <span class="glyphicon glyphicon-plus"></span>
+                            添加主题
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-{% buttons %}
-<button name="submit" class="btn btn-primary">add topic</button>
-{% endbuttons %}
-</form>
+        <div class="mt-lg text-center">
+            <a href="{% url 'learning_logs:topics' %}" class="btn btn-secondary">
+                <span class="glyphicon glyphicon-arrow-left"></span> 返回主题列表
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock content %}
-
