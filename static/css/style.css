@@ -173,9 +173,12 @@ h4 { font-size: 16px; }
 
 .navbar-nav > li > a:hover,
 .navbar-nav > li > a:focus,
-.navbar-nav > li.active > a {
+.navbar-nav > li.active > a,
+.navbar-nav > .active > a,
+.navbar-nav > .active > a:hover,
+.navbar-nav > .active > a:focus {
     color: var(--primary-color) !important;
-    background-color: transparent;
+    background-color: transparent !important;
     text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
 }
 
