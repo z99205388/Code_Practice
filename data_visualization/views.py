@@ -12,6 +12,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from .models import Chart
+from .record_parse import ApolloRecordParser
 
 # Create your views here.
 
@@ -133,6 +134,8 @@ def parse_file(file_path):
                 result["header"] = next(reader)
                 result["data"] = list(reader)
                 result["file_type"] = "csv"
+        elif file_path.endswith(".record"):
+            parse(file_path)
         else:
             ext = os.path.splitext(file_path)[1]
             result["detal_state"] = False

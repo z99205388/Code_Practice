@@ -427,6 +427,19 @@ def main():
     print("解析完成!")
     print(f"{'='*60}\n")
 
+def parse(file_path, verbose=False):
+      """
+      解析 Apollo record 文件
+      
+      Args:
+          file_path: record 文件路径
+          verbose: 是否输出详细信息
+          
+      Returns:
+          dict: ApolloRecordParser.parse() 的原始结果
+      """
+      parser = ApolloRecordParser(file_path)
+      return parser.parse(verbose=verbose)
 
 if __name__ == "__main__":
     main()
