@@ -135,7 +135,16 @@ def parse_file(file_path):
                 result["data"] = list(reader)
                 result["file_type"] = "csv"
         elif file_path.endswith(".record"):
-            parse(file_path)
+            apollo_parse = ApolloRecordParser(file_path)
+            parse_result = apollo_parse.parse(verbose=True)  # 开启调试输出
+            # 将解析结果转换为 generate_chart 兼容格式
+            data_rows = [
+                [channel, count]
+                for channel, count in parse_result["message_count"].items()
+            ]
+            result["data"] = data_rows
+            result["header"] = ["Channel", "Message Count"]
+            result["file_type"] = "record"
         else:
             ext = os.path.splitext(file_path)[1]
             result["detal_state"] = False
@@ -159,6 +168,10 @@ def safe_float_convert(value, default=0):
 
 def generate_chart(parse_file_result, chart_path, chart_type, chart_title):
     """根据解析结果生成图表"""
+    # 先检查解析状态
+    if not parse_file_result.get("detal_state", True):
+        raise ValueError(parse_file_result.get("error_message", "文件解析失败"))
+
     data = parse_file_result["data"]
     header = parse_file_result["header"]
 
@@ -171,9 +184,11 @@ def generate_chart(parse_file_result, chart_path, chart_type, chart_title):
         keys = list(data[0].keys())
         data = [[row.get(k, i) for k in keys] for i, row in enumerate(data)]
 
-    # 提取数据
-    x_values = [row[0] for row in data[:10]]
-    y_values = [safe_float_convert(row[1]) for row in data[:50] if len(row) > 1]
+    # 提取数据（统一切片数量）
+    MAX_POINTS = 10
+    data_slice = data[:MAX_POINTS]
+    x_values = [row[0] for row in data_slice]
+    y_values = [safe_float_convert(row[1]) for row in data_slice if len(row) > 1]
 
     # 图表类型的到函数映射
     plotter = {
