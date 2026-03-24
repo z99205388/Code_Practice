@@ -136,7 +136,7 @@ def parse_file(file_path):
                 result["file_type"] = "csv"
         elif file_path.endswith(".record"):
             apollo_parse = ApolloRecordParser(file_path)
-            parse_result = apollo_parse.parse(verbose=True)  # 开启调试输出
+            parse_result = apollo_parse.parse()  # 开启调试输出
             # 将解析结果转换为 generate_chart 兼容格式
             data_rows = [
                 [channel, count]

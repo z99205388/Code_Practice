@@ -404,28 +404,79 @@ def main():
     print(f"# 文件: {args.file}")
     print(f"{'#'*60}")
 
-    # 尝试使用Apollo原生解析
-    if not try_apollo_native_parse(args.file, args.channel):
-        # 使用通用解析器
-        print("\n使用通用二进制解析器...")
-        record_parser = ApolloRecordParser(args.file)
-        result = record_parser.parse(verbose=True)
+    # 尝试使用纯Python解析器（优先）
+    pure_python_success = try_pure_python_parse(args.file, args.channel, args.export, args.verbose)
 
-        # 如果指定了通道，获取该通道数据
-        if args.channel:
-            channel_data = record_parser.get_channel_data(args.channel)
-            if channel_data:
-                print(f"\n通道 '{args.channel}' 数据位置:")
-                for i, data in enumerate(channel_data[:10]):
-                    print(f"  消息 {i+1}: 偏移 {data['offset']}")
+    if not pure_python_success:
+        # 尝试使用Apollo原生解析
+        if not try_apollo_native_parse(args.file, args.channel):
+            # 使用通用解析器
+            print("\n使用通用二进制解析器...")
+            record_parser = ApolloRecordParser(args.file)
+            result = record_parser.parse(verbose=True)
 
-        # 导出摘要
-        if args.export:
-            record_parser.export_summary(args.export)
+            # 如果指定了通道，获取该通道数据
+            if args.channel:
+                channel_data = record_parser.get_channel_data(args.channel)
+                if channel_data:
+                    print(f"\n通道 '{args.channel}' 数据位置:")
+                    for i, data in enumerate(channel_data[:10]):
+                        print(f"  消息 {i+1}: 偏移 {data['offset']}")
+
+            # 导出摘要
+            if args.export:
+                record_parser.export_summary(args.export)
 
     print(f"\n{'='*60}")
     print("解析完成!")
     print(f"{'='*60}\n")
+
+
+def try_pure_python_parse(file_path, channel=None, export=None, verbose=True):
+    """尝试使用纯Python解析器
+
+    Args:
+        file_path: record文件路径
+        channel: 可选，指定解析的通道
+        export: 可选，导出文件路径
+        verbose: 是否显示详细信息
+
+    Returns:
+        bool: 是否成功解析
+    """
+    try:
+        # 添加proto路径
+        sys.path.insert(0, '/home/ubuntu/apollo/proto')
+        sys.path.insert(0, '/home/ubuntu/apollo/proto/modules')
+
+        # 添加record_reader模块路径
+        sys.path.insert(0, '/home/ubuntu/apollo')
+
+        from record_reader import ApolloRecordReader, ApolloRecordParserCLI
+
+        if verbose:
+            print("使用纯Python解析器...")
+
+        cli = ApolloRecordParserCLI(file_path)
+        cli.parse(
+            channel=channel,
+            max_messages=10,
+            export=export,
+            verbose=verbose,
+        )
+
+        return True
+
+    except ImportError as e:
+        if verbose:
+            print(f"纯Python解析器不可用 (ImportError: {e})")
+        return False
+    except Exception as e:
+        if verbose:
+            print(f"纯Python解析失败: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
+        return False
 
 if __name__ == "__main__":
     main()
