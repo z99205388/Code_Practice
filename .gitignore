@@ -16,6 +16,7 @@ db.sqlite3-journal
 .env.local
 secret_key.env
 .venv
+ll_env/
 env/
 venv/
 ENV/
@@ -47,5 +48,6 @@ coverage.xml
 # mypy
 .mypy_cache/
 
-# DOCS
-*.md
+# Node.js
+node_modules/
+package-lock.json

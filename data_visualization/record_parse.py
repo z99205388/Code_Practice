@@ -26,6 +26,111 @@ from typing import Dict, List, Optional
 os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
 
 
+class ApolloRecordParser:
+    """Apollo Record 文件解析器类"""
+
+    def __init__(self, file_path: str, max_messages: int = 10, verbose: bool = False):
+        self.file_path = file_path
+        self.max_messages = max_messages
+        self.verbose = verbose
+        self.result = {
+            'file_path': file_path,
+            'file_size': 0,
+            'channels': {},
+            'messages': [],
+            'message_count': {},
+            'detal_state': True,
+            'error_message': '',
+        }
+
+    def parse(self) -> Dict:
+        """解析record文件并返回结果"""
+        try:
+            if not os.path.exists(self.file_path):
+                self.result['detal_state'] = False
+                self.result['error_message'] = f"File not found: {self.file_path}"
+                return self.result
+
+            self.result['file_size'] = os.path.getsize(self.file_path)
+
+            try:
+                from cyber_record.record import Record
+                from cyber_record.cyber.proto import record_pb2
+                from google.protobuf.internal.decoder import _DecodeVarint
+            except ImportError:
+                self.result['detal_state'] = False
+                self.result['error_message'] = "cyber_record library not installed"
+                return self.result
+
+            record = Record(self.file_path)
+            channels = record.get_channel_cache()
+
+            for ch in channels:
+                self.result['channels'][ch.name] = {
+                    'type': ch.message_type,
+                    'count': ch.message_number,
+                }
+                self.result['message_count'][ch.name] = ch.message_number
+
+            count = 0
+            for chunk_header_index, chunk_body_index in record._reader.sorted_chunk_indexs:
+                if count >= self.max_messages:
+                    break
+
+                pos = chunk_header_index.position
+                record._reader._set_position(pos)
+
+                section_type = int.from_bytes(record._reader._read(4), byteorder='little')
+                record._reader._skip_size(4)
+                section_size = int.from_bytes(record._reader._read(8), byteorder='little')
+                data = record._reader._read(section_size)
+
+                offset = 0
+                while offset < len(data) and count < self.max_messages:
+                    try:
+                        tag = data[offset]
+                        field_num = tag >> 3
+                        wire_type = tag & 0x7
+
+                        if field_num != 1 or wire_type != 2:
+                            break
+
+                        msg_len, new_offset = _DecodeVarint(data, offset + 1)
+                        single_msg = record_pb2.SingleMessage()
+                        single_msg.ParseFromString(data[new_offset:new_offset + msg_len])
+
+                        topic = single_msg.channel_name
+                        timestamp = single_msg.time
+
+                        self.result['message_count'][topic] = self.result['message_count'].get(topic, 0) + 1
+
+                        msg_data = {
+                            'channel': topic,
+                            'timestamp': timestamp,
+                        }
+
+                        message_type = record._reader.message_type_pool.get(topic)
+                        if message_type:
+                            message = message_type()
+                            message.ParseFromString(single_msg.content)
+                            _extract_message_data(message, msg_data)
+
+                        self.result['messages'].append(msg_data)
+                        count += 1
+                        offset = new_offset + msg_len
+
+                    except Exception as e:
+                        if self.verbose:
+                            print(f"Parse error: {e}")
+                        break
+
+        except Exception as e:
+            self.result['detal_state'] = False
+            self.result['error_message'] = str(e)
+
+        return self.result
+
+
 def parse_record(
     file_path: str,
     channel: str = None,
