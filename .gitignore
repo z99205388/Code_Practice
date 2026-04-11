@@ -36,6 +36,7 @@ Thumbs.db
 # Media and static (if using collectstatic)
 /media/
 /staticfiles/
+/record_frames/
 
 # Testing and coverage
 htmlcov/
