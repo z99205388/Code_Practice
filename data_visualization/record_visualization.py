@@ -361,6 +361,77 @@ class RecordPlayer:
                 for m in future_poses[:50]  # 未来50个点
             ]
         
+        # 生成虚拟车道线（基于自车轨迹推断）
+        # 注意：record 文件通常不包含 map 数据，这里根据轨迹生成示意车道线
+        if closest_pose and 'position' in closest_pose:
+            ego_x = closest_pose['position']['x']
+            ego_y = closest_pose['position']['y']
+            ego_heading = closest_pose.get('heading', 0)
+            
+            # 使用历史定位数据生成更长的车道线（前后各100个点）
+            past_poses = [m for m in localization_msgs if m['timestamp'] <= timestamp]
+            future_poses = [m for m in localization_msgs if m['timestamp'] > timestamp]
+            
+            lane_points = (
+                [{'x': m['position']['x'], 'y': m['position']['y'], 
+                  'heading': m.get('heading', ego_heading)} 
+                 for m in past_poses[-100:]] +
+                [{'x': m['position']['x'], 'y': m['position']['y'], 
+                  'heading': m.get('heading', ego_heading)} 
+                 for m in future_poses[:100]]
+            )
+            
+            if lane_points and len(lane_points) > 1:
+                # 根据轨迹点生成左右车道线
+                lane_width = 3.5  # 标准车道宽度（米）
+                
+                center_line = []
+                left_boundary = []
+                right_boundary = []
+                
+                for i, point in enumerate(lane_points):
+                    px, py = point['x'], point['y']
+                    
+                    # 使用点自带的航向角（如果有），否则计算方向
+                    if 'heading' in point and point['heading'] != 0:
+                        direction_x = np.cos(point['heading'])
+                        direction_y = np.sin(point['heading'])
+                    elif i < len(lane_points) - 1:
+                        next_point = lane_points[i + 1]
+                        direction_x = next_point['x'] - px
+                        direction_y = next_point['y'] - py
+                        direction_len = (direction_x**2 + direction_y**2)**0.5
+                        if direction_len > 0:
+                            direction_x /= direction_len
+                            direction_y /= direction_len
+                        else:
+                            direction_x = np.cos(ego_heading)
+                            direction_y = np.sin(ego_heading)
+                    else:
+                        direction_x = np.cos(ego_heading)
+                        direction_y = np.sin(ego_heading)
+                    
+                    # 垂直方向（用于计算车道边界）
+                    perp_x = -direction_y
+                    perp_y = direction_x
+                    
+                    center_line.append({'x': px, 'y': py})
+                    left_boundary.append({
+                        'x': px + perp_x * lane_width / 2,
+                        'y': py + perp_y * lane_width / 2,
+                    })
+                    right_boundary.append({
+                        'x': px - perp_x * lane_width / 2,
+                        'y': py - perp_y * lane_width / 2,
+                    })
+                
+                frame_data['lanes'] = [{
+                    'id': 'inferred_lane',
+                    'center_line': center_line,
+                    'left_boundary': left_boundary,
+                    'right_boundary': right_boundary,
+                }]
+        
         return {'success': True, 'data': frame_data}
     
     def get_total_frames(self) -> int:
@@ -537,36 +608,39 @@ class RecordPlayer:
     def _draw_lanes(self, ax, lanes: List[Dict]):
         """绘制车道线"""
         for lane in lanes:
-            # 中心线
+            # 中心线（虚线，淡蓝色）
             center_line = lane.get('center_line', [])
             if center_line:
                 x_coords = [p['x'] for p in center_line]
                 y_coords = [p['y'] for p in center_line]
                 ax.plot(x_coords, y_coords, 
                        color=self.COLORS['lane_line'],
-                       linewidth=1.5,
+                       linewidth=2,
                        linestyle='--',
-                       alpha=0.6)
+                       alpha=0.5,
+                       dashes=[10, 5])  # 虚线间距
             
-            # 左边界
+            # 左边界（实线，黄色）
             left_boundary = lane.get('left_boundary', [])
             if left_boundary:
                 x_coords = [p['x'] for p in left_boundary]
                 y_coords = [p['y'] for p in left_boundary]
                 ax.plot(x_coords, y_coords,
                        color=self.COLORS['lane_boundary'],
-                       linewidth=2,
-                       alpha=0.7)
+                       linewidth=2.5,
+                       linestyle='-',
+                       alpha=0.8)
             
-            # 右边界
+            # 右边界（实线，黄色）
             right_boundary = lane.get('right_boundary', [])
             if right_boundary:
                 x_coords = [p['x'] for p in right_boundary]
                 y_coords = [p['y'] for p in right_boundary]
                 ax.plot(x_coords, y_coords,
                        color=self.COLORS['lane_boundary'],
-                       linewidth=2,
-                       alpha=0.7)
+                       linewidth=2.5,
+                       linestyle='-',
+                       alpha=0.8)
     
     def _draw_trajectory(self, ax, data: Dict):
         """绘制轨迹线"""
