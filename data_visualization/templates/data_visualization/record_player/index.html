@@ -1,0 +1,90 @@
+{% extends "learning_logs/base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Apollo Record 2D 可视化播放器</h2>
+            <p class="text-muted">仿 nuplan 风格的自动驾驶场景可视化 - 自车、他车、车道线、轨迹线</p>
+            
+            <hr>
+            
+            <div class="row">
+                <!-- 上传区域 -->
+                <div class="col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><span class="glyphicon glyphicon-upload"></span> 上传 Record 文件</h3>
+                        </div>
+                        <div class="panel-body">
+                            <form method="post" action="{% url 'data_visualization:upload_record_file' %}" 
+                                  enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="record_file">选择 .record 文件</label>
+                                    <input type="file" class="form-control" id="record_file" 
+                                           name="record_file" accept=".record" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <span class="glyphicon glyphicon-play"></span> 上传并播放
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 演示入口 -->
+                <div class="col-md-6">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><span class="glyphicon glyphicon-film"></span> 演示</h3>
+                        </div>
+                        <div class="panel-body">
+                            <p>使用默认的 demo record 文件体验 2D 可视化播放器</p>
+                            <a href="{% url 'data_visualization:demo_record_player' %}" 
+                               class="btn btn-info btn-block">
+                                <span class="glyphicon glyphicon-eye-open"></span> 体验 Demo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <!-- 功能说明 -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><span class="glyphicon glyphicon-info-sign"></span> 功能说明</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h4><span style="color: #FF6B35;">■</span> 自车 (Ego Vehicle)</h4>
+                            <p>橙色矩形框，显示自车位置、朝向和行驶轨迹</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h4><span style="color: #4ECDC4;">■</span> 他车 (Other Vehicles)</h4>
+                            <p>青色矩形框，显示周围车辆的位置和朝向</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h4><span style="color: #87CEEB;">-</span> 车道线 (Lane Lines)</h4>
+                            <p>虚线显示车道中心线，实线显示道路边界</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4><span style="color: #FF8888;">●</span> 轨迹线 (Trajectory)</h4>
+                            <p>浅红色为历史轨迹，鲜红色为未来轨迹</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h4><span class="glyphicon glyphicon-time"></span> 时间轴播放</h4>
+                            <p>支持进度条拖动、播放/暂停、速度控制（0.5x/1x/2x/4x）</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

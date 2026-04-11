@@ -282,6 +282,7 @@ def parse_record(
 
 def _extract_message_data(message, msg_data: Dict):
     """提取消息数据"""
+    # 1. 定位数据（Ego Vehicle Pose）
     if hasattr(message, 'pose'):
         try:
             msg_data['position'] = {
@@ -293,8 +294,57 @@ def _extract_message_data(message, msg_data: Dict):
                 'x': message.pose.linear_velocity.x,
                 'y': message.pose.linear_velocity.y,
             }
+            # 提取航向角
+            if hasattr(message.pose, 'heading'):
+                msg_data['heading'] = message.pose.heading
+            # 提取欧拉角（如果有）
+            elif hasattr(message.pose, 'euler_angles'):
+                msg_data['heading'] = message.pose.euler_angles.z
         except AttributeError:
             pass
+    
+    # 2. 感知障碍数据（其他车辆、行人等）
+    elif hasattr(message, 'perception_obstacle'):
+        try:
+            msg_data['obstacles'] = []
+            for obstacle in message.perception_obstacle:
+                obj_data = {
+                    'id': obstacle.id,
+                    'position': {
+                        'x': obstacle.position.x,
+                        'y': obstacle.position.y,
+                        'z': obstacle.position.z,
+                    },
+                    'velocity': {
+                        'x': obstacle.velocity.x,
+                        'y': obstacle.velocity.y,
+                    },
+                    'length': getattr(obstacle, 'length', 4.0),
+                    'width': getattr(obstacle, 'width', 1.8),
+                    'height': getattr(obstacle, 'height', 1.5),
+                    'type': getattr(obstacle, 'type', 0),  # 0=UNKNOWN, 1=VEHICLE, 2=PEDESTRIAN
+                    'heading': getattr(obstacle, 'heading', 0),
+                }
+                msg_data['obstacles'].append(obj_data)
+        except AttributeError:
+            pass
+    
+    # 3. 规划轨迹数据
+    elif hasattr(message, 'trajectory_point'):
+        try:
+            msg_data['trajectory'] = []
+            for point in message.trajectory_point:
+                point_data = {
+                    'x': point.path_point.x,
+                    'y': point.path_point.y,
+                    'v': getattr(point, 'v', 0),
+                    'time': getattr(point, 'relative_time', 0),
+                }
+                msg_data['trajectory'].append(point_data)
+        except AttributeError:
+            pass
+    
+    # 4. 其他车辆状态
     elif hasattr(message, 'speed_mps'):
         try:
             msg_data['speed_mps'] = message.speed_mps
